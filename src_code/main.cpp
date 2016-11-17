@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <stdlib.h>
+#include <sstream>
 
 #include <FL/Fl.H>
 #include <FL/Fl_Menu_Bar.H>
@@ -25,13 +26,15 @@
 #include <FL/Fl_Multiline_Output.H>
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Return_Button.H>
+#include <FL/Fl_Text_Display.H>
 
 using namespace std;
+
+vector<Torso> torso;
 
 void create_torsoCB(Fl_Widget* w, void* p);
 void cancel_torsoCB(Fl_Widget* w, void* p);
 class Torso_Dialog;
-class Torso_Output;
 
 class Torso_Dialog {
 	public:
@@ -95,8 +98,8 @@ Fl_Window *win;
 Fl_Menu_Bar *menubar;
 Fl_Window *dialog;
 Torso_Dialog *torso_dlg; // The dialog of interest!
-Torso_Output *torso_output_dlg;
-vector<Torso> torso;
+
+
 
 void CB(Fl_Widget* w, void* p) { } // No action
 
@@ -117,18 +120,8 @@ Torso createTorso () {
 }
 
 void create_torsoCB(Fl_Widget* w, void* p) { // Replace with call to model!
- 	cout << "### Creating robot part" << endl;
- 	cout << "Name : " << torso_dlg->name() << endl;
- 	cout << "Part # : " << torso_dlg->part_number() << endl;
- 	cout << "Type : " << torso_dlg->type() << endl;
- 	cout << "Weight : " << torso_dlg->weight() << endl;
- 	cout << "Cost : " << torso_dlg->cost() << endl;
- 	cout << "Battery Compartments: " << torso_dlg->batteryComp() << endl;
- 	cout << "Descript: " << torso_dlg->description() << endl;
-
  	torso.push_back(createTorso());
-
- 	torso_dlg->hide();
+ 	//torso_dlg->hide();
 }
 
 void cancel_torsoCB(Fl_Widget* w, void* p) {
@@ -160,14 +153,33 @@ void closeCB(Fl_Widget *w, void* p)
 		Fl_Multiline_Output * output;
 }; */
 
-void torsoOPCB(Fl_Widget* w, void* p) {
+/*std::string report_torso() {
+	ostringstream of;
+	for(std::size_t i=0; torso.size();i++)
+	{
+		of << "Part name: " << torso[i].GetName() 
+	<< "\nPart #: " << torso[i].GetPartNumber() 
+	<< "\nWeight: " << torso[i].GetWeight() 
+	<< "\nCost: " << torso[i].GetCost()
+	<< "\nBattery Comp: " << torso[i].GetDescription()
+	<< "\nDescription: " << torso[i].GetBatteryCompartmentSize() << "\n";
+	}
+	return of.str();
+}*/
+
+void torsoOPCB(Fl_Widget *w, void* p) {
 	dialog = new Fl_Window(340, 300, "Robot Part");
 
-	Fl_Multiline_Output* output = new Fl_Multiline_Output(100, 10, 400, 100, "Torso list:");
+	Fl_Multiline_Output* output = new Fl_Multiline_Output(100, 10, 400, 200, "Torso list:");
+
+	//output->value(report_torso().c_str());
 	output->value(torso[0].print().c_str());
+
 	dialog->end();
- 	dialog->set_non_modal();
+	dialog->set_non_modal();
  	dialog->show();
+
+
 }
 
 void torsoCB(Fl_Widget *w, void* p)
@@ -261,7 +273,7 @@ Fl_Menu_Item menuitems[] = {
 };
 
 int main () {
-
+	
 	/*vector<RobotModel> rbmodel;
 	vector<TrackingParts> tp;
 	vector<Customer> cus;
