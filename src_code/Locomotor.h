@@ -9,6 +9,7 @@ class Locomotor: public RobotPart {
 			      std::string description, int partType, double kPowerConsumeW, double kMaxSpeed);
 		double GetMaxSpeed();
 		double GetPowerConsumeW();
+		std::string print();
 
 	private:
 		double PowerConsumeW;

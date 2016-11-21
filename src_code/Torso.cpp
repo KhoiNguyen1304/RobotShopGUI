@@ -15,11 +15,11 @@ std::string Torso::print()
 	ostringstream of;
 
 	of << "Part name: " << GetName() 
-	<< "\nPart #: " << GetPartNumber() 
-	<< "\nWeight: " << GetWeight() 
-	<< "\nCost: " << GetCost()
-	<< "\nBattery Comp: " << GetDescription()
-	<< "\nDescription: " << GetBatteryCompartmentSize() << "\n";
-	
+	<< endl << "Part #: " << GetPartNumber() 
+	<< endl << "Weight: " << GetWeight() 
+	<< endl << "Cost: " << GetCost()
+	<< endl << "Battery Comp: " << GetBatteryCompartmentSize()
+	<< endl << "Description: " << GetDescription() << endl;
+
 	return of.str();
 }
