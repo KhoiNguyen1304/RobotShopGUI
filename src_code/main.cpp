@@ -1,5 +1,6 @@
 #include "RobotPart.h"
 #include "RobotModel.h"
+#include "RobotOrder.h"
 #include "TrackingParts.h"
 #include "Torso.h"
 #include "Head.h"
@@ -42,6 +43,10 @@ vector<Battery> batt;
 vector<Customer> cus;
 vector<Sale> sale;
 
+vector<RobotModel> model;
+vector<RobotOrder> order;
+vector<TrackingParts> track;
+
 void create_torsoCB(Fl_Widget* w, void* p);
 void cancel_torsoCB(Fl_Widget* w, void* p);
 void create_headCB(Fl_Widget* w, void* p);
@@ -56,6 +61,13 @@ void create_cusCB(Fl_Widget* w, void* p);
 void cancel_cusCB(Fl_Widget* w, void* p);
 void create_saleCB(Fl_Widget* w, void* p);
 void cancel_saleCB(Fl_Widget* w, void* p);
+void create_modelCB(Fl_Widget* w, void* p);
+void cancel_modelCB(Fl_Widget* w, void* p);
+void create_orderCB(Fl_Widget* w, void* p);
+void cancel_orderCB(Fl_Widget* w, void* p);
+
+void report_partsCB(Fl_Widget *w, void* p);
+void report_modelCB(Fl_Widget *w, void* p);
 
 class Torso_Dialog;
 class Head_Dialog;
@@ -64,6 +76,8 @@ class Loco_Dialog;
 class Batt_Dialog;
 class Cus_Dialog;
 class Sale_Dialog;
+class Model_Dialog;
+class Order_Dialog;
 
 class Torso_Dialog {
 	public:
@@ -432,6 +446,153 @@ class Sale_Dialog {
  	Fl_Button *rp_cancel;
 };
 
+class Model_Dialog {
+	public:
+ 	Model_Dialog() { // Create and populate the dialog (but don't show it!)
+ 		std::ostringstream oss_torso, oss_head, oss_arm, oss_loco, oss_batt;
+
+		dialog = new Fl_Window(640, 360, "Robot Model");
+
+		/*Fl_Multiline_Output* output_torso = new Fl_Multiline_Output(100, 10, 200, 100, "Torso list:");
+		for(std::size_t i=0; i < torso.size();i++) {
+
+			oss_torso << torso[i].print() << endl;
+		}
+		output_torso->value(oss_torso.str().c_str());
+
+		Fl_Multiline_Output* output_head = new Fl_Multiline_Output(100, 120, 200, 100, "Head list:");
+		for(std::size_t i=0; i < head.size();i++) {
+
+			oss_head << head[i].print() << endl;
+		}
+		output_head->value(oss_head.str().c_str());
+
+		Fl_Multiline_Output* output_arm = new Fl_Multiline_Output(400, 10, 200, 100, "Arm list:");
+		for(std::size_t i=0; i < arm.size();i++) {
+
+			oss_arm << arm[i].print() << endl;
+		}
+		output_arm->value(oss_arm.str().c_str());
+
+		Fl_Multiline_Output* output_loco = new Fl_Multiline_Output(400, 120, 200, 100, "Loco list:");
+		for(std::size_t i=0; i < loco.size();i++) {
+
+			oss_loco << loco[i].print() << endl;
+		}
+		output_loco->value(oss_loco.str().c_str());
+
+		Fl_Multiline_Output* output_batt = new Fl_Multiline_Output(250, 230, 200, 100, "Battery list:");
+		for(std::size_t i=0; i < batt.size();i++) {
+
+			oss_batt << batt[i].print() << endl;
+		}
+		output_batt->value(oss_batt.str().c_str()); */
+
+		parts = new Fl_Button(25, 10, 600, 100, "Show Parts");
+		parts->callback((Fl_Callback*)report_partsCB, 0);
+
+		rp_name = new Fl_Input(100, 120, 210, 25, "Model name:");
+ 		rp_name->align(FL_ALIGN_LEFT);
+
+ 		rp_model_number = new Fl_Input(430, 120, 210, 25, "Model number:");
+ 		rp_model_number->align(FL_ALIGN_LEFT);
+
+ 		rp_price = new Fl_Input(250, 160, 210, 25, "Model Price:");
+ 		rp_price->align(FL_ALIGN_LEFT);
+
+ 		rp_torso = new Fl_Input(100, 200, 210, 25, "Torso name\nto buy:");
+ 		rp_torso->align(FL_ALIGN_LEFT);
+
+ 		rp_head = new Fl_Input(100, 240, 210, 25, "Head name\nto buy:");
+ 		rp_head->align(FL_ALIGN_LEFT);
+
+ 		rp_arm = new Fl_Input(430, 200, 210, 25, "Arm name\nto buy:");
+ 		rp_arm->align(FL_ALIGN_LEFT);
+
+ 		rp_loco = new Fl_Input(430, 240, 210, 25, "Loco name\nto buy:");
+ 		rp_loco->align(FL_ALIGN_LEFT);
+
+ 		rp_batt = new Fl_Input(250, 280, 210, 25, "Battery name\n to buy:");
+ 		rp_batt->align(FL_ALIGN_LEFT);
+
+ 		rp_create = new Fl_Return_Button(225, 320, 120, 25, "Create");
+ 		rp_create->callback((Fl_Callback *)create_modelCB, 0);
+
+ 		rp_cancel = new Fl_Button(400, 320, 60, 25, "Cancel");
+ 		rp_cancel->callback((Fl_Callback *)cancel_modelCB, 0);
+
+		dialog->end();
+		dialog->set_non_modal();
+    }
+
+	void show() {dialog->show();}
+ 	void hide() {dialog->hide();}
+ 	string name() {return rp_name->value();}
+ 	string model_number() {return rp_model_number->value();}
+ 	string price() {return rp_price->value();}
+ 	string torso_name() {return rp_torso->value();}
+ 	string head_name() {return rp_head->value();}
+ 	string arm_name() {return rp_arm->value();}
+ 	string loco_name() {return rp_loco->value();}
+ 	string batt_name() {return rp_batt->value();}
+
+ 	private:
+ 	Fl_Window *dialog;
+ 	Fl_Input *rp_name;
+	Fl_Input *rp_model_number;
+	Fl_Input *rp_price;
+	Fl_Input *rp_torso;
+	Fl_Input *rp_head;
+	Fl_Input *rp_arm;
+	Fl_Input *rp_loco;
+	Fl_Input *rp_batt;
+ 	Fl_Return_Button *rp_create;
+ 	Fl_Button *rp_cancel;
+ 	Fl_Button *parts;
+};
+
+class Order_Dialog {
+	public:
+ 	Order_Dialog() { // Create and populate the dialog (but don't show it!)
+ 		dialog = new Fl_Window(400, 200, "Create Order");
+
+ 		models = new Fl_Button(25, 10, 380, 60, "Show Models");
+		models->callback((Fl_Callback*)report_modelCB, 0);
+
+ 		rp_orderNumber = new Fl_Input(120, 80, 210, 25, "Order Number:");
+ 		rp_orderNumber->align(FL_ALIGN_LEFT);
+
+ 		rp_date = new Fl_Input(120, 110, 210, 25, "Date:");
+ 		rp_date->align(FL_ALIGN_LEFT);
+
+ 		rp_price = new Fl_Input(120, 140, 210, 25, "Model Price:");
+ 		rp_price->align(FL_ALIGN_LEFT);
+
+ 		rp_create = new Fl_Return_Button(145, 180, 120, 25, "Create");
+ 		rp_create->callback((Fl_Callback *)create_orderCB, 0);
+
+ 		rp_cancel = new Fl_Button(270, 180, 60, 25, "Cancel");
+ 		rp_cancel->callback((Fl_Callback *)cancel_orderCB, 0);
+
+ 		dialog->end();
+ 		dialog->set_non_modal();
+    }
+
+	void show() {dialog->show();}
+ 	void hide() {dialog->hide();}
+ 	string orderNumber() {return rp_orderNumber->value();}
+ 	string date() {return rp_date->value();}
+ 	string price() {return rp_price->value();}
+
+ 	private:
+ 	Fl_Window *dialog;
+ 	Fl_Input *rp_orderNumber;
+	Fl_Input *rp_date;
+	Fl_Input *rp_price;
+ 	Fl_Return_Button *rp_create;
+ 	Fl_Button *rp_cancel;
+ 	Fl_Button *models;
+};
 
 Fl_Window *win;
 Fl_Menu_Bar *menubar;
@@ -445,6 +606,9 @@ Batt_Dialog *batt_dlg;
 
 Cus_Dialog *cus_dlg;
 Sale_Dialog *sale_dlg;
+
+Model_Dialog *model_dlg;
+Order_Dialog *order_dlg;
 
 void CB(Fl_Widget* w, void* p) { } // No action
 
@@ -612,6 +776,56 @@ void cancel_saleCB(Fl_Widget* w, void* p) {
 	sale_dlg->hide();
 }
 
+RobotModel createModel () {
+	std::string oname = model_dlg->name();
+	int oModelNumber = atoi(model_dlg->model_number().c_str());
+	double oprice = atof(model_dlg->price().c_str());
+	return RobotModel(oname, oModelNumber, oprice);
+}
+
+TrackingParts createTrack () {
+	std::string otorso = model_dlg->torso_name();
+	std::string ohead = model_dlg->head_name();
+	std::string oarm = model_dlg->arm_name();
+	std::string oloco = model_dlg->loco_name();
+	std::string obatt = model_dlg->batt_name();
+	return TrackingParts(otorso, ohead, oarm, oloco, obatt);
+}
+
+void menu_create_modelCB(Fl_Widget* w, void* p) {
+ 	model_dlg->show();
+}
+
+void create_modelCB(Fl_Widget* w, void* p) { // Replace with call to model!
+ 	model.push_back(createModel());
+ 	track.push_back(createTrack());
+ 	model_dlg->hide();
+}
+
+void cancel_modelCB(Fl_Widget* w, void* p) {
+ 	model_dlg->hide();
+}
+
+RobotOrder createOrder () {
+	int oorderNumber = atoi(order_dlg->orderNumber().c_str());
+	std::string odate = order_dlg->date();
+	double oprice = atof(order_dlg->price().c_str()) * 1.08 + 5;
+	return RobotOrder(oorderNumber, odate, oprice);
+}
+
+void menu_create_orderCB(Fl_Widget* w, void* p) {
+ 	order_dlg->show();
+}
+
+void create_orderCB(Fl_Widget* w, void* p) { // Replace with call to model!
+ 	order.push_back(createOrder());
+ 	order_dlg->hide();
+}
+
+void cancel_orderCB(Fl_Widget* w, void* p) {
+ 	order_dlg->hide();
+}
+
 void closeCB(Fl_Widget *w, void* p)
 {
 	Fl_Window *win = (Fl_Window *)w;
@@ -702,6 +916,47 @@ void report_saleCB(Fl_Widget *w, void* p) {
  	dialog->show();
 }
 
+void report_modelCB(Fl_Widget *w, void* p) {
+	std::ostringstream oss_model, oss_track;
+
+	dialog = new Fl_Window(400, 250, "Robot Models");
+
+	Fl_Multiline_Output* output_model = new Fl_Multiline_Output(160, 10, 200, 100, "Robot Model List:");
+	for(std::size_t i=0; i < model.size();i++) {
+
+		oss_model << model[i].print() << endl;
+	}
+	output_model->value(oss_model.str().c_str());
+
+	Fl_Multiline_Output* output_track = new Fl_Multiline_Output(160, 150, 200, 100, "Selected parts\n with models:");
+	for(std::size_t i=0; i < model.size();i++) {
+
+		oss_track << "Selected parts with model #" << i+1 << "\n" << track[i].print() << endl;
+	}
+	output_track->value(oss_track.str().c_str());
+
+	dialog->end();
+	dialog->set_non_modal();
+ 	dialog->show();
+}
+
+void report_orderCB(Fl_Widget *w, void* p) {
+	std::ostringstream oss_order;
+
+	dialog = new Fl_Window(400, 120, "Robot Orders");
+
+	Fl_Multiline_Output* output_order = new Fl_Multiline_Output(160, 10, 200, 100, "Robot Order List:");
+	for(std::size_t i=0; i < order.size();i++) {
+
+		oss_order << order[i].print() << endl;
+	}
+	output_order->value(oss_order.str().c_str());
+
+	dialog->end();
+	dialog->set_non_modal();
+ 	dialog->show();
+}
+
 void newCB(Fl_Widget *w, void* p)
 {}
 
@@ -730,10 +985,10 @@ Fl_Menu_Item menuitems[] = {
 	{"&Edit",0,0,0, FL_SUBMENU},
 	{0},
 	{"&Create",0,0,0,FL_SUBMENU},
-		{"&Order",0,(Fl_Callback*)orderCB},
+		{"&Order",0,(Fl_Callback*)menu_create_orderCB},
 		{ "&Customer",0,(Fl_Callback*)menu_create_cusCB },
 		{ "&Sale Associate",0,(Fl_Callback*)menu_create_saleCB },
-		{ "&Robot Model",0,(Fl_Callback*)robotModelCB },
+		{ "&Robot Model",0,(Fl_Callback*)menu_create_modelCB },
 		{ "&Robot Component",0,0,0, FL_SUBMENU},
 			{"&Torso",0, (Fl_Callback *)menu_create_torsoCB},
 			{ "&Head",0, (Fl_Callback*)menu_create_headCB },
@@ -743,10 +998,10 @@ Fl_Menu_Item menuitems[] = {
 			{0},
 			{0},
 	{"&Report", 0,0,0,FL_SUBMENU},
-	{"&Order",0,(Fl_Callback*)orderCB},
+	{"&Order",0,(Fl_Callback*)report_orderCB},
 	{ "&Customer",0,(Fl_Callback*)report_cusCB },
 	{ "&Sale Associate",0,(Fl_Callback*)report_saleCB },
-	{ "&Robot Model",0,(Fl_Callback*)robotModelCB },
+	{ "&Robot Model",0,(Fl_Callback*)report_modelCB },
 	{ "&Robot Component",0,(Fl_Callback*)report_partsCB},
 	{0},
 	{0}
@@ -763,6 +1018,9 @@ int main () {
 
  	cus_dlg = new Cus_Dialog{};
  	sale_dlg = new Sale_Dialog{};
+
+ 	model_dlg = new Model_Dialog{};
+ 	order_dlg = new Order_Dialog{};
 
 	win = new Fl_Window(640, 480, "Robot Robbie Shop");
 

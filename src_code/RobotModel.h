@@ -11,6 +11,7 @@ class RobotModel {
 		std::string GetName();
 		int GetModelNumber();
 		double GetPrice();
+		std::string print();
 
 	private:
 		std::string name;
