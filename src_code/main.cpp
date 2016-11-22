@@ -6,6 +6,7 @@
 #include "Arm.h"
 #include "Locomotor.h"
 #include "Battery.h"
+#include "Customer.h"
 
 #include <iostream>
 #include <fstream>
@@ -37,6 +38,8 @@ vector<Arm> arm;
 vector<Locomotor> loco;
 vector<Battery> batt;
 
+vector<Customer> cus;
+
 void create_torsoCB(Fl_Widget* w, void* p);
 void cancel_torsoCB(Fl_Widget* w, void* p);
 void create_headCB(Fl_Widget* w, void* p);
@@ -47,12 +50,15 @@ void create_locoCB(Fl_Widget* w, void* p);
 void cancel_locoCB(Fl_Widget* w, void* p);
 void create_battCB(Fl_Widget* w, void* p);
 void cancel_battCB(Fl_Widget* w, void* p);
+void create_cusCB(Fl_Widget* w, void* p);
+void cancel_cusCB(Fl_Widget* w, void* p);
 
 class Torso_Dialog;
 class Head_Dialog;
 class Arm_Dialog;
 class Loco_Dialog;
 class Batt_Dialog;
+class Cus_Dialog;
 
 class Torso_Dialog {
 	public:
@@ -344,6 +350,49 @@ class Batt_Dialog {
  	Fl_Button *rp_cancel;
 };
 
+class Cus_Dialog {
+	public:
+ 	Cus_Dialog() { // Create and populate the dialog (but don't show it!)
+ 		dialog = new Fl_Window(340, 300, "Create Customer Info");
+
+ 		rp_name = new Fl_Input(120, 10, 210, 25, "Name:");
+ 		rp_name->align(FL_ALIGN_LEFT);
+
+ 		rp_phone_number = new Fl_Input(120, 40, 210, 25, "Phone number:");
+ 		rp_phone_number->align(FL_ALIGN_LEFT);
+
+ 		rp_wallet = new Fl_Input(120, 70, 210, 25, "Wallet:");
+ 		rp_wallet->align(FL_ALIGN_LEFT);
+
+ 		rp_address = new Fl_Multiline_Input(120, 100, 210, 75, "Address:");
+ 		rp_address->align(FL_ALIGN_LEFT);
+
+ 		rp_create = new Fl_Return_Button(145, 280, 120, 25, "Create");
+ 		rp_create->callback((Fl_Callback *)create_cusCB, 0);
+
+ 		rp_cancel = new Fl_Button(270, 280, 60, 25, "Cancel");
+ 		rp_cancel->callback((Fl_Callback *)cancel_cusCB, 0);
+ 		dialog->end();
+ 		dialog->set_non_modal();
+    }
+
+	void show() {dialog->show();}
+ 	void hide() {dialog->hide();}
+ 	string name() {return rp_name->value();}
+ 	string phone_number() {return rp_phone_number->value();}
+ 	string address() {return rp_address->value();}
+ 	string wallet() {return rp_wallet->value();}
+
+ 	private:
+ 	Fl_Window *dialog;
+ 	Fl_Input *rp_name;
+	Fl_Input *rp_phone_number;
+ 	Fl_Input *rp_address;
+ 	Fl_Input *rp_wallet;
+ 	Fl_Return_Button *rp_create;
+ 	Fl_Button *rp_cancel;
+};
+
 
 
 
@@ -355,6 +404,8 @@ Head_Dialog *head_dlg;
 Arm_Dialog *arm_dlg;
 Loco_Dialog *loco_dlg;
 Batt_Dialog *batt_dlg;
+
+Cus_Dialog *cus_dlg;
 
 void CB(Fl_Widget* w, void* p) { } // No action
 
@@ -482,6 +533,27 @@ void cancel_battCB(Fl_Widget* w, void* p) {
  	batt_dlg->hide();
 }
 
+Customer createCus () {
+	std::string oname = cus_dlg->name();
+	std::string ophoneNumber = cus_dlg->phone_number();
+	std::string oaddress = cus_dlg->address();
+	double owallet = atof(cus_dlg->wallet().c_str());
+	return Customer(oname, ophoneNumber, oaddress, owallet);
+}
+
+void menu_create_cusCB(Fl_Widget* w, void* p) {
+ 	cus_dlg->show();
+}
+
+void create_cusCB(Fl_Widget* w, void* p) {
+	cus.push_back(createCus());
+	cus_dlg->hide();
+}
+
+void cancel_cusCB(Fl_Widget* w, void* p) {
+	cus_dlg->hide();
+}
+
 void closeCB(Fl_Widget *w, void* p)
 {
 	Fl_Window *win = (Fl_Window *)w;
@@ -538,20 +610,22 @@ void report_partsCB(Fl_Widget *w, void* p) {
  	dialog->show();
 }
 
-void torsoCB(Fl_Widget *w, void* p)
-{}
+void report_cusCB(Fl_Widget *w, void* p) {
+	std::ostringstream oss_cus;
 
-void headCB(Fl_Widget *w, void* p)
-{}
+	dialog = new Fl_Window(340, 120, "Customer Info");
 
-void armCB(Fl_Widget *w, void* p)
-{}
+	Fl_Multiline_Output* output_cus = new Fl_Multiline_Output(120, 10, 200, 100, "Customer List:");
+	for(std::size_t i=0; i < cus.size();i++) {
 
-void locomotorCB(Fl_Widget *w, void* p)
-{}
+		oss_cus << cus[i].print() << endl;
+	}
+	output_cus->value(oss_cus.str().c_str());
 
-void batteryCB(Fl_Widget *w, void* p)
-{}
+	dialog->end();
+	dialog->set_non_modal();
+ 	dialog->show();
+}
 
 void newCB(Fl_Widget *w, void* p)
 {}
@@ -568,13 +642,7 @@ void orderCB(Fl_Widget *w, void* p)
 void saleCB(Fl_Widget *w, void* p)
 {}
 
-void customerCB(Fl_Widget *w, void* p)
-{}
-
 void robotModelCB(Fl_Widget *w, void* p)
-{}
-
-void robotCompCB(Fl_Widget *w, void* p)
 {}
 
 Fl_Menu_Item menuitems[] = {
@@ -588,7 +656,7 @@ Fl_Menu_Item menuitems[] = {
 	{0},
 	{"&Create",0,0,0,FL_SUBMENU},
 		{"&Order",0,(Fl_Callback*)orderCB},
-		{ "&Customer",0,(Fl_Callback*)customerCB },
+		{ "&Customer",0,(Fl_Callback*)menu_create_cusCB },
 		{ "&Sale Associate",0,(Fl_Callback*)saleCB },
 		{ "&Robot Model",0,(Fl_Callback*)robotModelCB },
 		{ "&Robot Component",0,0,0, FL_SUBMENU},
@@ -601,7 +669,7 @@ Fl_Menu_Item menuitems[] = {
 			{0},
 	{"&Report", 0,0,0,FL_SUBMENU},
 	{"&Order",0,(Fl_Callback*)orderCB},
-	{ "&Customer",0,(Fl_Callback*)customerCB },
+	{ "&Customer",0,(Fl_Callback*)report_cusCB },
 	{ "&Sale Associate",0,(Fl_Callback*)saleCB },
 	{ "&Robot Model",0,(Fl_Callback*)robotModelCB },
 	{ "&Robot Component",0,(Fl_Callback*)report_partsCB},
@@ -617,6 +685,8 @@ int main () {
  	arm_dlg = new Arm_Dialog{};
  	loco_dlg = new Loco_Dialog{};
  	batt_dlg = new Batt_Dialog{};
+
+ 	cus_dlg = new Cus_Dialog{};
 
 	win = new Fl_Window(640, 480, "Robot Robbie Shop");
 
