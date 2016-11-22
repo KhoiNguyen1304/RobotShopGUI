@@ -7,6 +7,7 @@
 #include "Locomotor.h"
 #include "Battery.h"
 #include "Customer.h"
+#include "sale.h"
 
 #include <iostream>
 #include <fstream>
@@ -39,6 +40,7 @@ vector<Locomotor> loco;
 vector<Battery> batt;
 
 vector<Customer> cus;
+vector<Sale> sale;
 
 void create_torsoCB(Fl_Widget* w, void* p);
 void cancel_torsoCB(Fl_Widget* w, void* p);
@@ -52,6 +54,8 @@ void create_battCB(Fl_Widget* w, void* p);
 void cancel_battCB(Fl_Widget* w, void* p);
 void create_cusCB(Fl_Widget* w, void* p);
 void cancel_cusCB(Fl_Widget* w, void* p);
+void create_saleCB(Fl_Widget* w, void* p);
+void cancel_saleCB(Fl_Widget* w, void* p);
 
 class Torso_Dialog;
 class Head_Dialog;
@@ -59,6 +63,7 @@ class Arm_Dialog;
 class Loco_Dialog;
 class Batt_Dialog;
 class Cus_Dialog;
+class Sale_Dialog;
 
 class Torso_Dialog {
 	public:
@@ -393,7 +398,39 @@ class Cus_Dialog {
  	Fl_Button *rp_cancel;
 };
 
+class Sale_Dialog {
+	public:
+ 	Sale_Dialog() { // Create and populate the dialog (but don't show it!)
+ 		dialog = new Fl_Window(400, 150, "Create Sale Associate Info");
 
+ 		rp_name = new Fl_Input(170, 10, 210, 25, "Name:");
+ 		rp_name->align(FL_ALIGN_LEFT);
+
+ 		rp_e_number = new Fl_Input(170, 40, 210, 25, "Employee's number:");
+ 		rp_e_number->align(FL_ALIGN_LEFT);
+
+ 		rp_create = new Fl_Return_Button(145, 120, 120, 25, "Create");
+ 		rp_create->callback((Fl_Callback *)create_saleCB, 0);
+
+ 		rp_cancel = new Fl_Button(270, 120, 60, 25, "Cancel");
+ 		rp_cancel->callback((Fl_Callback *)cancel_saleCB, 0);
+
+ 		dialog->end();
+ 		dialog->set_non_modal();
+    }
+
+	void show() {dialog->show();}
+ 	void hide() {dialog->hide();}
+ 	string name() {return rp_name->value();}
+ 	string e_number() {return rp_e_number->value();}
+
+ 	private:
+ 	Fl_Window *dialog;
+ 	Fl_Input *rp_name;
+	Fl_Input *rp_e_number;
+ 	Fl_Return_Button *rp_create;
+ 	Fl_Button *rp_cancel;
+};
 
 
 Fl_Window *win;
@@ -405,7 +442,9 @@ Arm_Dialog *arm_dlg;
 Loco_Dialog *loco_dlg;
 Batt_Dialog *batt_dlg;
 
+
 Cus_Dialog *cus_dlg;
+Sale_Dialog *sale_dlg;
 
 void CB(Fl_Widget* w, void* p) { } // No action
 
@@ -554,6 +593,25 @@ void cancel_cusCB(Fl_Widget* w, void* p) {
 	cus_dlg->hide();
 }
 
+Sale createSale () {
+	std::string oname = sale_dlg->name();
+	std::string oENumber = sale_dlg->e_number();
+	return Sale(oname, oENumber);
+}
+
+void menu_create_saleCB(Fl_Widget* w, void* p) {
+ 	sale_dlg->show();
+}
+
+void create_saleCB(Fl_Widget* w, void* p) {
+	sale.push_back(createSale());
+	sale_dlg->hide();
+}
+
+void cancel_saleCB(Fl_Widget* w, void* p) {
+	sale_dlg->hide();
+}
+
 void closeCB(Fl_Widget *w, void* p)
 {
 	Fl_Window *win = (Fl_Window *)w;
@@ -627,6 +685,23 @@ void report_cusCB(Fl_Widget *w, void* p) {
  	dialog->show();
 }
 
+void report_saleCB(Fl_Widget *w, void* p) {
+	std::ostringstream oss_sale;
+
+	dialog = new Fl_Window(400, 120, "Sale Associate Info");
+
+	Fl_Multiline_Output* output_sale = new Fl_Multiline_Output(160, 10, 200, 100, "Sale Associate List:");
+	for(std::size_t i=0; i < sale.size();i++) {
+
+		oss_sale << sale[i].print() << endl;
+	}
+	output_sale->value(oss_sale.str().c_str());
+
+	dialog->end();
+	dialog->set_non_modal();
+ 	dialog->show();
+}
+
 void newCB(Fl_Widget *w, void* p)
 {}
 
@@ -657,7 +732,7 @@ Fl_Menu_Item menuitems[] = {
 	{"&Create",0,0,0,FL_SUBMENU},
 		{"&Order",0,(Fl_Callback*)orderCB},
 		{ "&Customer",0,(Fl_Callback*)menu_create_cusCB },
-		{ "&Sale Associate",0,(Fl_Callback*)saleCB },
+		{ "&Sale Associate",0,(Fl_Callback*)menu_create_saleCB },
 		{ "&Robot Model",0,(Fl_Callback*)robotModelCB },
 		{ "&Robot Component",0,0,0, FL_SUBMENU},
 			{"&Torso",0, (Fl_Callback *)menu_create_torsoCB},
@@ -670,7 +745,7 @@ Fl_Menu_Item menuitems[] = {
 	{"&Report", 0,0,0,FL_SUBMENU},
 	{"&Order",0,(Fl_Callback*)orderCB},
 	{ "&Customer",0,(Fl_Callback*)report_cusCB },
-	{ "&Sale Associate",0,(Fl_Callback*)saleCB },
+	{ "&Sale Associate",0,(Fl_Callback*)report_saleCB },
 	{ "&Robot Model",0,(Fl_Callback*)robotModelCB },
 	{ "&Robot Component",0,(Fl_Callback*)report_partsCB},
 	{0},
@@ -687,6 +762,7 @@ int main () {
  	batt_dlg = new Batt_Dialog{};
 
  	cus_dlg = new Cus_Dialog{};
+ 	sale_dlg = new Sale_Dialog{};
 
 	win = new Fl_Window(640, 480, "Robot Robbie Shop");
 

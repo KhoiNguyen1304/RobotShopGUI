@@ -8,7 +8,7 @@
 #           [ <TAB> <command> <endl> ] +
 
 # object files
-OBJS = main.o RobotPart.o Torso.o Head.o Arm.o Locomotor.o Battery.o RobotModel.o TrackingParts.o RobotOrder.o Customer.o
+OBJS = main.o RobotPart.o Torso.o Head.o Arm.o Locomotor.o Battery.o RobotModel.o TrackingParts.o RobotOrder.o Customer.o sale.o
 
 # compiler
 #   since fltk-config --cxx displays the c++ compiler that was used to compile FLTK (g++)
@@ -72,6 +72,9 @@ RobotOrder.o : RobotOrder.cpp RobotOrder.h
 
 Customer.o: Customer.cpp Customer.h
 	$(CC) $(CXX) $(CXXFLAGS) Customer.cpp
+
+sale.o: sale.cpp sale.h
+	$(CC) $(CXX) $(CXXFLAGS) sale.cpp
 
 clean:
 	\rm *.o a.out    
